@@ -60,7 +60,8 @@ export default function NewBacktest() {
           addNotification('Backtest completed successfully');
           return 100;
         }
-        return prev + Math.random() * 3 + 1;
+        const next = prev + Math.random() * 3 + 1;
+        return next >= 100 ? 100 : next;
       });
     }, 200);
   };

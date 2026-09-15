@@ -21,7 +21,7 @@ function DrawdownChart() {
     const ddData = demoEquityCurve.map(d => {
       peak = Math.max(peak, d.equity);
       const dd = ((d.equity - peak) / peak) * 100;
-      return { time: d.date as any, value: Math.round(dd * 100) / 100 };
+      return { time: d.time as any, value: Math.round(dd * 100) / 100 };
     });
     series.setData(ddData);
     chart.timeScale().fitContent();
@@ -46,11 +46,15 @@ function MonthlyChart() {
     const series = chart.addSeries(HistogramSeries, {
       color: '#00D4FF',
     });
-    series.setData(demoMonthlyReturns.map((d, i) => ({
-      time: `2026-0${i + 1}-15` as any,
-      value: d.profit,
-      color: d.profit >= 0 ? '#00E676' : '#FF4D6D',
-    })));
+    series.setData(demoMonthlyReturns.map((d, i) => {
+      const month = String(i + 1).padStart(2, '0');
+      const timestamp = Math.floor(new Date(`2026-${month}-15`).getTime() / 1000);
+      return {
+        time: timestamp as any,
+        value: d.profit,
+        color: d.profit >= 0 ? '#00E676' : '#FF4D6D',
+      };
+    }));
     chart.timeScale().fitContent();
     const handleResize = () => { if (chartRef.current) chart.applyOptions({ width: chartRef.current.clientWidth }); };
     window.addEventListener('resize', handleResize);

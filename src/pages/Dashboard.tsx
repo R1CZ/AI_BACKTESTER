@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { demoMetrics, demoBacktests, demoSessions, demoRegimes, demoEquityCurve } from '../data/demo';
 import { TrendingUp, TrendingDown, Target, Shield, Activity, BarChart3, ArrowUpRight, ArrowDownRight, FlaskConical } from 'lucide-react';
-// Icons used in metric cards
 import { useEffect, useRef } from 'react';
 import { createChart, ColorType, AreaSeries, LineSeries } from 'lightweight-charts';
 
@@ -52,8 +51,8 @@ function EquityChart() {
       lineStyle: 2,
     });
 
-    balanceSeries.setData(demoEquityCurve.map(d => ({ time: d.date as any, value: d.balance })));
-    equitySeries.setData(demoEquityCurve.map(d => ({ time: d.date as any, value: d.equity })));
+    balanceSeries.setData(demoEquityCurve.map(d => ({ time: d.time as any, value: d.balance })));
+    equitySeries.setData(demoEquityCurve.map(d => ({ time: d.time as any, value: d.equity })));
 
     chart.timeScale().fitContent();
 

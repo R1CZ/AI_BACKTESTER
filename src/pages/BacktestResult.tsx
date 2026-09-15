@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { demoMetrics, demoTrades, demoSessions, demoRegimes, demoEquityCurve, generateCandleData } from '../data/demo';
 import { createChart, ColorType, CandlestickSeries, AreaSeries } from 'lightweight-charts';
-import { Brain, Target, Shield, AlertTriangle, CheckCircle, XCircle, Download } from 'lucide-react';
+import { Brain, Shield, AlertTriangle, CheckCircle, XCircle, Download } from 'lucide-react';
 
 function TradingChart() {
   const chartRef = useRef<HTMLDivElement>(null);
@@ -43,7 +43,7 @@ function EquityChart() {
     const series = chart.addSeries(AreaSeries, {
       lineColor: '#00D4FF', topColor: 'rgba(0, 212, 255, 0.12)', bottomColor: 'rgba(0, 212, 255, 0.0)', lineWidth: 2,
     });
-    series.setData(demoEquityCurve.map(d => ({ time: d.date as any, value: d.equity })));
+    series.setData(demoEquityCurve.map(d => ({ time: d.time as any, value: d.equity })));
     chart.timeScale().fitContent();
     const handleResize = () => { if (chartRef.current) chart.applyOptions({ width: chartRef.current.clientWidth }); };
     window.addEventListener('resize', handleResize);
@@ -306,14 +306,15 @@ export default function BacktestResult() {
           {/* Hourly Heatmap */}
           <div className="bg-[#0D131D] border border-[#1C2633] rounded-xl p-5">
             <h3 className="text-sm font-semibold text-white mb-4">24-Hour Performance Heatmap</h3>
-            <div className="grid grid-cols-24 gap-0.5">
+            <div className="grid gap-0.5" style={{ gridTemplateColumns: 'repeat(24, minmax(0, 1fr))' }}>
               {Array.from({ length: 24 }, (_, h) => {
-                const profit = (Math.random() * 200 - 50);
+                // Stable deterministic profit values based on hour
+                const profit = Math.sin(h * 0.8) * 80 + Math.cos(h * 1.2) * 40 - 10;
                 const intensity = Math.min(Math.abs(profit) / 100, 1);
-                const color = profit >= 0 ? `rgba(0, 230, 118, ${intensity})` : `rgba(255, 77, 109, ${intensity})`;
+                const color = profit >= 0 ? `rgba(0, 230, 118, ${0.2 + intensity * 0.8})` : `rgba(255, 77, 109, ${0.2 + intensity * 0.8})`;
                 return (
                   <div key={h} className="text-center">
-                    <div className="h-12 rounded" style={{ backgroundColor: color }} title={`${h}:00 - $${profit.toFixed(0)}`} />
+                    <div className="h-12 rounded" style={{ backgroundColor: color }} title={`${String(h).padStart(2, '0')}:00 - $${profit.toFixed(0)}`} />
                     <span className="text-[9px] text-[#7A8BA0] mt-1">{String(h).padStart(2, '0')}</span>
                   </div>
                 );

@@ -1,6 +1,7 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useApp } from '../App';
 import { LayoutDashboard, FlaskConical, History, Bot, BarChart3, Brain, Zap, Shuffle, Network, Settings, Bell, ChevronRight, Activity } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -17,6 +18,14 @@ const navItems = [
 export default function Layout() {
   const { state, addNotification } = useApp();
   const location = useLocation();
+  const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString('en-US', { hour12: false }));
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString('en-US', { hour12: false }));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#070B12]">
@@ -95,7 +104,7 @@ export default function Layout() {
             </div>
 
             <div className="text-xs text-[#7A8BA0] font-mono">
-              {new Date().toLocaleTimeString('en-US', { hour12: false })}
+              {currentTime}
             </div>
 
             <button
@@ -122,11 +131,11 @@ export default function Layout() {
 
       {/* Notifications */}
       <div className="fixed bottom-6 right-6 space-y-2 z-50">
-        {state.notifications.map((msg, i) => (
-          <div key={i} className="animate-slide-up px-4 py-3 rounded-lg bg-[#131B27] border border-[#1C2633] shadow-xl text-sm text-[#E8F0F8] max-w-xs">
+        {state.notifications.map((n) => (
+          <div key={n.id} className="animate-slide-up px-4 py-3 rounded-lg bg-[#131B27] border border-[#1C2633] shadow-xl text-sm text-[#E8F0F8] max-w-xs">
             <div className="flex items-center gap-2">
               <Brain className="w-4 h-4 text-[#00D4FF]" />
-              {msg}
+              {n.msg}
             </div>
           </div>
         ))}

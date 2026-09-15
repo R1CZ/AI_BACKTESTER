@@ -1,19 +1,23 @@
 import { Trade, BacktestMetrics, Backtest, SessionData, RegimeData, StrategyAnalysis } from '../types';
 
+// Seeded random for stable demo data
+let _seed = 98765;
+const _seededRandom = () => { _seed = (_seed * 16807) % 2147483647; return (_seed - 1) / 2147483646; };
+
 export const demoTrades: Trade[] = Array.from({ length: 347 }, (_, i) => {
-  const isWin = Math.random() > 0.322;
-  const direction = Math.random() > 0.48 ? 'BUY' : 'SELL';
-  const basePrice = 2300 + Math.random() * 200;
-  const move = isWin ? (Math.random() * 15 + 2) : -(Math.random() * 8 + 1);
+  const isWin = _seededRandom() > 0.322;
+  const direction = _seededRandom() > 0.48 ? 'BUY' : 'SELL';
+  const basePrice = 2300 + _seededRandom() * 200;
+  const move = isWin ? (_seededRandom() * 15 + 2) : -(_seededRandom() * 8 + 1);
   const entry = basePrice;
   const exit = direction === 'BUY' ? entry + move : entry - move;
-  const sl = direction === 'BUY' ? entry - (Math.random() * 12 + 5) : entry + (Math.random() * 12 + 5);
-  const tp = direction === 'BUY' ? entry + (Math.random() * 20 + 10) : entry - (Math.random() * 20 + 10);
-  const profit = isWin ? Math.round((Math.random() * 80 + 5) * 100) / 100 : -Math.round((Math.random() * 45 + 2) * 100) / 100;
-  const day = Math.floor(Math.random() * 28) + 1;
+  const sl = direction === 'BUY' ? entry - (_seededRandom() * 12 + 5) : entry + (_seededRandom() * 12 + 5);
+  const tp = direction === 'BUY' ? entry + (_seededRandom() * 20 + 10) : entry - (_seededRandom() * 20 + 10);
+  const profit = isWin ? Math.round((_seededRandom() * 80 + 5) * 100) / 100 : -Math.round((_seededRandom() * 45 + 2) * 100) / 100;
+  const day = Math.floor(_seededRandom() * 28) + 1;
   const month = Math.floor(i / 30) + 1;
-  const hour = Math.floor(Math.random() * 24);
-  const minute = Math.floor(Math.random() * 60);
+  const hour = Math.floor(_seededRandom() * 24);
+  const minute = Math.floor(_seededRandom() * 60);
   const reasons = [
     'Liquidity Sweep + Bullish BOS + FVG Retest',
     'Market Structure Shift + Order Block',
@@ -38,10 +42,10 @@ export const demoTrades: Trade[] = Array.from({ length: 347 }, (_, i) => {
     tp: Math.round(tp * 100) / 100,
     profit,
     commission: -0.70,
-    swap: Math.round((Math.random() * -0.5) * 100) / 100,
-    duration: `${Math.floor(Math.random() * 45) + 1}m ${Math.floor(Math.random() * 60)}s`,
+    swap: Math.round((_seededRandom() * -0.5) * 100) / 100,
+    duration: `${Math.floor(_seededRandom() * 45) + 1}m ${Math.floor(_seededRandom() * 60)}s`,
     result: isWin ? 'WIN' as const : 'LOSS' as const,
-    reason: reasons[Math.floor(Math.random() * reasons.length)],
+    reason: reasons[Math.floor(_seededRandom() * reasons.length)],
   };
 });
 
@@ -119,23 +123,26 @@ export const demoStrategy: StrategyAnalysis = {
   ],
 };
 
-export const demoEquityCurve: { date: string; balance: number; equity: number }[] = Array.from({ length: 200 }, (_, i) => {
+export const demoEquityCurve: { time: number; date: string; balance: number; equity: number }[] = Array.from({ length: 200 }, (_, i) => {
   const progress = i / 200;
   const base = 1000 + progress * 842;
-  const noise = Math.sin(i * 0.3) * 30 + Math.random() * 20 - 10;
+  const noise = Math.sin(i * 0.3) * 30 + (Math.sin(i * 1.7) * 15);
   const balance = Math.round((base + noise * 0.3) * 100) / 100;
   const equity = Math.round((base + noise) * 100) / 100;
   const month = Math.floor(i / 16.67) + 1;
   const day = Math.floor((i % 16.67) * 1.8) + 1;
+  const dateStr = `2026-${String(Math.min(month, 12)).padStart(2, '0')}-${String(Math.min(day, 28)).padStart(2, '0')}`;
+  const timestamp = Math.floor(new Date(dateStr).getTime() / 1000);
   return {
-    date: `2026-${String(Math.min(month, 12)).padStart(2, '0')}-${String(Math.min(day, 28)).padStart(2, '0')}`,
+    time: timestamp,
+    date: dateStr,
     balance: Math.max(balance, 900),
     equity: Math.max(equity, 880),
   };
 });
 
 export const demoHourlyHeatmap: number[][] = Array.from({ length: 7 }, () =>
-  Array.from({ length: 24 }, () => Math.round((Math.random() * 200 - 50) * 100) / 100)
+  Array.from({ length: 24 }, () => Math.round((_seededRandom() * 200 - 50) * 100) / 100)
 );
 
 export const demoMonthlyReturns: { month: string; profit: number }[] = [
@@ -153,6 +160,8 @@ export const generateCandleData = () => {
   const data = [];
   let price = 2350;
   const startDate = new Date('2026-01-01');
+  let seed = 12345;
+  const seededRandom = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
   
   for (let i = 0; i < 500; i++) {
     const date = new Date(startDate);
@@ -161,10 +170,10 @@ export const generateCandleData = () => {
     date.setMinutes((i % 60) * 24 % 60);
     
     const open = price;
-    const change = (Math.random() - 0.48) * 8;
+    const change = (seededRandom() - 0.48) * 8;
     const close = open + change;
-    const high = Math.max(open, close) + Math.random() * 5;
-    const low = Math.min(open, close) - Math.random() * 5;
+    const high = Math.max(open, close) + seededRandom() * 5;
+    const low = Math.min(open, close) - seededRandom() * 5;
     
     data.push({
       time: Math.floor(date.getTime() / 1000),

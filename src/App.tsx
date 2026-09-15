@@ -16,7 +16,7 @@ interface AppState {
   mt5Connected: boolean;
   demoMode: boolean;
   currentAccount: string;
-  notifications: string[];
+  notifications: { id: number; msg: string }[];
 }
 
 interface AppContextType {
@@ -42,9 +42,10 @@ export default function App() {
   });
 
   const addNotification = (msg: string) => {
-    setState(prev => ({ ...prev, notifications: [msg, ...prev.notifications].slice(0, 5) }));
+    const id = Date.now() + Math.random();
+    setState(prev => ({ ...prev, notifications: [{ id, msg }, ...prev.notifications].slice(0, 5) }));
     setTimeout(() => {
-      setState(prev => ({ ...prev, notifications: prev.notifications.slice(0, -1) }));
+      setState(prev => ({ ...prev, notifications: prev.notifications.filter(n => n.id !== id) }));
     }, 4000);
   };
 

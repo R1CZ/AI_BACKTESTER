@@ -1,9 +1,26 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { createChart, ColorType, AreaSeries } from 'lightweight-charts';
-import { Shuffle as ShuffleIcon, Play, AlertTriangle, Info } from 'lucide-react';
+import { Shuffle as ShuffleIcon, Info } from 'lucide-react';
 
 function MonteCarloChart() {
   const chartRef = useRef<HTMLDivElement>(null);
+
+  // Generate stable simulation paths (seeded pseudo-random)
+  const paths = useMemo(() => {
+    let seed = 42;
+    const seededRandom = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+    return Array.from({ length: 20 }, () => {
+      let equity = 1000;
+      return Array.from({ length: 100 }, (_, i) => {
+        const change = (seededRandom() - 0.4) * 30;
+        equity = Math.max(equity + change, 500);
+        const baseDate = new Date('2026-01-01');
+        baseDate.setDate(baseDate.getDate() + i * 3);
+        return { time: Math.floor(baseDate.getTime() / 1000) as any, value: Math.round(equity * 100) / 100 };
+      });
+    });
+  }, []);
+
   useEffect(() => {
     if (!chartRef.current) return;
     const chart = createChart(chartRef.current, {
@@ -12,16 +29,6 @@ function MonteCarloChart() {
       rightPriceScale: { borderColor: '#1C2633' },
       timeScale: { borderColor: '#1C2633' },
       width: chartRef.current.clientWidth, height: 300,
-    });
-
-    // Generate multiple simulation paths
-    const paths = Array.from({ length: 20 }, (_, pathIdx) => {
-      let equity = 1000;
-      return Array.from({ length: 100 }, (_, i) => {
-        const change = (Math.random() - 0.4) * 30;
-        equity = Math.max(equity + change, 500);
-        return { time: `2026-${String(Math.floor(i / 12) + 1).padStart(2, '0')}-${String((i % 12) + 1).padStart(2, '0')}` as any, value: Math.round(equity * 100) / 100 };
-      });
     });
 
     // Add worst case
@@ -118,10 +125,11 @@ export default function MonteCarlo() {
         <div className="flex items-end gap-0.5 h-32">
           {Array.from({ length: 40 }, (_, i) => {
             const x = (i - 20) / 5;
-            const height = Math.exp(-x * x / 2) * 100 + Math.random() * 10;
+            const noise = Math.sin(i * 2.7) * 5 + Math.cos(i * 1.3) * 3;
+            const height = Math.exp(-x * x / 2) * 100 + noise;
             const isPositive = i >= 20;
             return (
-              <div key={i} className="flex-1 rounded-t" style={{ height: `${height}%`, backgroundColor: isPositive ? 'rgba(0, 230, 118, 0.6)' : 'rgba(255, 77, 109, 0.6)' }} />
+              <div key={i} className="flex-1 rounded-t" style={{ height: `${Math.max(height, 2)}%`, backgroundColor: isPositive ? 'rgba(0, 230, 118, 0.6)' : 'rgba(255, 77, 109, 0.6)' }} />
             );
           })}
         </div>
