@@ -129,9 +129,15 @@ export const demoEquityCurve: { time: string; date: string; balance: number; equ
   const noise = Math.sin(i * 0.3) * 30 + (Math.sin(i * 1.7) * 15);
   const balance = Math.round((base + noise * 0.3) * 100) / 100;
   const equity = Math.round((base + noise) * 100) / 100;
-  const month = Math.floor(i / 16.67) + 1;
-  const day = Math.floor((i % 16.67) * 1.8) + 1;
-  const dateStr = `2026-${String(Math.min(month, 12)).padStart(2, '0')}-${String(Math.min(day, 28)).padStart(2, '0')}`;
+  
+  // Generate sequential dates starting from 2026-01-01
+  const startDate = new Date('2026-01-01');
+  startDate.setDate(startDate.getDate() + i);
+  const year = startDate.getFullYear();
+  const month = String(startDate.getMonth() + 1).padStart(2, '0');
+  const day = String(startDate.getDate()).padStart(2, '0');
+  const dateStr = `${year}-${month}-${day}`;
+  
   return {
     time: dateStr,
     date: dateStr,
@@ -164,7 +170,7 @@ export const generateCandleData = () => {
   
   for (let i = 0; i < 500; i++) {
     const date = new Date(startDate);
-    date.setDate(date.getDate() + Math.floor(i / 60));
+    date.setDate(date.getDate() + i);
     
     const open = price;
     const change = (seededRandom() - 0.48) * 8;
