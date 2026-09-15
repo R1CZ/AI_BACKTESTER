@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { useApp } from '../App';
-import { demoStrategy } from '../data/demo';
+import { analyzePythonCode, AnalysisResult } from '../utils/pythonAnalyzer';
 import { Upload, FileCode, CheckCircle, AlertTriangle, XCircle, Zap, Play, Settings, ChevronDown, ChevronUp, Brain, Shield, Clock, Cpu } from 'lucide-react';
 
 type Step = 'upload' | 'analysis' | 'configure' | 'running' | 'complete';
@@ -9,10 +9,12 @@ export default function NewBacktest() {
   const { addNotification } = useApp();
   const [step, setStep] = useState<Step>('upload');
   const [file, setFile] = useState<string | null>(null);
+  const [fileSize, setFileSize] = useState<number>(0);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [config, setConfig] = useState({
-    symbol: 'XAUUSDm', timeframe: 'M1', startDate: '2026-01-01', endDate: '2026-08-31',
+    symbol: 'XAUUSD', timeframe: 'M1', startDate: '2026-01-01', endDate: '2026-08-31',
     initialBalance: 1000, spreadMode: 'variable', commission: 0.70, slippage: 2,
     executionMode: 'market', leverage: 100, lotMode: 'fixed', riskPerTrade: 1,
     preset: 'realistic',
@@ -20,32 +22,51 @@ export default function NewBacktest() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const processFile = async (f: File) => {
+    setFile(f.name);
+    setFileSize(f.size);
+    setStep('analysis');
+    setAnalyzing(true);
+
+    try {
+      const code = await f.text();
+      // Perform actual analysis
+      const result = analyzePythonCode(f.name, code);
+      setAnalysisResult(result);
+      
+      // Update config with detected values
+      if (result.symbol !== 'Not detected') {
+        setConfig(c => ({ ...c, symbol: result.symbol }));
+      }
+      if (result.timeframe !== 'Not detected') {
+        setConfig(c => ({ ...c, timeframe: result.timeframe }));
+      }
+      
+      setTimeout(() => {
+        setAnalyzing(false);
+        setStep('configure');
+        addNotification('Code analysis completed');
+      }, 1500);
+    } catch (err) {
+      setAnalyzing(false);
+      addNotification('Error reading file');
+      setStep('upload');
+    }
+  };
+
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     const f = e.dataTransfer.files[0];
     if (f && f.name.endsWith('.py')) {
-      setFile(f.name);
-      setStep('analysis');
-      startAnalysis();
+      processFile(f);
     }
   }, []);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (f && f.name.endsWith('.py')) {
-      setFile(f.name);
-      setStep('analysis');
-      startAnalysis();
+      processFile(f);
     }
-  };
-
-  const startAnalysis = () => {
-    setAnalyzing(true);
-    setTimeout(() => {
-      setAnalyzing(false);
-      setStep('configure');
-      addNotification('Code analysis completed');
-    }, 3000);
   };
 
   const startBacktest = () => {
@@ -133,10 +154,12 @@ export default function NewBacktest() {
           <div className="flex items-center gap-3 p-3 rounded-lg bg-[#131B27] border border-[#1C2633]">
             <FileCode className="w-4 h-4 text-[#00D4FF]" />
             <span className="text-sm text-white font-mono">{file}</span>
-            <span className="text-xs text-[#7A8BA0] ml-auto">Python 3.11 • 24.3 KB</span>
+            <span className="text-xs text-[#7A8BA0] ml-auto">
+              {analysisResult ? `Python ${analysisResult.python} • ${(fileSize / 1024).toFixed(1)} KB` : 'Reading file...'}
+            </span>
           </div>
 
-          {demoStrategy && (
+          {analysisResult && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Strategy Info */}
               <div className="space-y-3">
@@ -144,10 +167,10 @@ export default function NewBacktest() {
                   <Cpu className="w-4 h-4 text-[#00D4FF]" /> Strategy Detection
                 </h3>
                 {[
-                  { label: 'Python Version', value: demoStrategy.python },
-                  { label: 'Trading Engine', value: demoStrategy.engine },
-                  { label: 'Detected Symbol', value: demoStrategy.symbol },
-                  { label: 'Detected Timeframe', value: demoStrategy.timeframe },
+                  { label: 'Python Version', value: analysisResult.python },
+                  { label: 'Trading Engine', value: analysisResult.engine },
+                  { label: 'Detected Symbol', value: analysisResult.symbol },
+                  { label: 'Detected Timeframe', value: analysisResult.timeframe },
                 ].map(item => (
                   <div key={item.label} className="flex justify-between text-sm">
                     <span className="text-[#7A8BA0]">{item.label}</span>
@@ -162,19 +185,25 @@ export default function NewBacktest() {
                   <Zap className="w-4 h-4 text-[#FFB020]" /> Strategy Components
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {demoStrategy.components.map((c: string) => (
-                    <span key={c} className="px-2 py-1 rounded text-xs bg-[#00E676]/10 text-[#00E676] border border-[#00E676]/20">
-                      ✓ {c}
-                    </span>
-                  ))}
+                  {analysisResult.components.length > 0 ? (
+                    analysisResult.components.map((c: string) => (
+                      <span key={c} className="px-2 py-1 rounded text-xs bg-[#00E676]/10 text-[#00E676] border border-[#00E676]/20">
+                        ✓ {c}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-xs text-[#7A8BA0]">No components detected</span>
+                  )}
                 </div>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {demoStrategy.aiComponents.map((c: string) => (
-                    <span key={c} className="px-2 py-1 rounded text-xs bg-[#00D4FF]/10 text-[#00D4FF] border border-[#00D4FF]/20">
-                      🤖 {c}
-                    </span>
-                  ))}
-                </div>
+                {analysisResult.aiComponents.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {analysisResult.aiComponents.map((c: string) => (
+                      <span key={c} className="px-2 py-1 rounded text-xs bg-[#00D4FF]/10 text-[#00D4FF] border border-[#00D4FF]/20">
+                        🤖 {c}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Warnings */}
@@ -182,13 +211,19 @@ export default function NewBacktest() {
                 <h3 className="text-sm font-semibold text-white flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-[#FFB020]" /> Warnings & Issues
                 </h3>
-                {demoStrategy.warnings.map((w: string, i: number) => (
+                {analysisResult.warnings.length === 0 && analysisResult.issues.length === 0 && (
+                  <div className="flex items-center gap-2 text-sm text-[#00E676]">
+                    <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    No issues detected
+                  </div>
+                )}
+                {analysisResult.warnings.map((w: string, i: number) => (
                   <div key={i} className="flex items-center gap-2 text-sm text-[#FFB020]">
                     <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
                     {w}
                   </div>
                 ))}
-                {demoStrategy.issues.map((issue: any, i: number) => (
+                {analysisResult.issues.map((issue: any, i: number) => (
                   <div key={i} className={`p-3 rounded-lg border ${issue.severity === 'HIGH' ? 'bg-[#FF4D6D]/5 border-[#FF4D6D]/20' : issue.severity === 'MEDIUM' ? 'bg-[#FFB020]/5 border-[#FFB020]/20' : 'bg-[#00D4FF]/5 border-[#00D4FF]/20'}`}>
                     <div className="flex items-center gap-2 mb-1">
                       <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${issue.severity === 'HIGH' ? 'bg-[#FF4D6D]/20 text-[#FF4D6D]' : issue.severity === 'MEDIUM' ? 'bg-[#FFB020]/20 text-[#FFB020]' : 'bg-[#00D4FF]/20 text-[#00D4FF]'}`}>

@@ -71,8 +71,9 @@ export default function Layout() {
               <div className={`w-2 h-2 rounded-full ${state.mt5Connected ? 'bg-[#00E676] animate-pulse-glow' : 'bg-[#FF4D6D]'}`} />
               <span className="text-xs text-[#7A8BA0]">MT5 {state.mt5Connected ? 'Connected' : 'Disconnected'}</span>
             </div>
-            <p className="text-[10px] text-[#4A5568] mt-1 font-mono">Acc: {state.currentAccount}</p>
-            {state.demoMode && <p className="text-[10px] text-[#FFB020] mt-0.5">DEMO MODE</p>}
+            {state.mt5Connected && (
+              <p className="text-[10px] text-[#4A5568] mt-1 font-mono">Acc: {state.currentAccount}</p>
+            )}
           </div>
         </div>
       </aside>
@@ -92,12 +93,6 @@ export default function Layout() {
           </div>
 
           <div className="flex items-center gap-4">
-            {state.demoMode && (
-              <span className="text-[10px] px-2 py-1 rounded bg-[#FFB020]/10 text-[#FFB020] border border-[#FFB020]/20 font-medium">
-                ⚠ DEMO DATA — Not Live MT5
-              </span>
-            )}
-            
             <div className="flex items-center gap-2 text-xs text-[#7A8BA0]">
               <div className={`w-1.5 h-1.5 rounded-full ${state.mt5Connected ? 'bg-[#00E676]' : 'bg-[#FF4D6D]'}`} />
               <span>{state.mt5Connected ? 'MT5 Connected' : 'MT5 Offline'}</span>

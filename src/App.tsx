@@ -15,7 +15,6 @@ import MonteCarlo from './pages/MonteCarlo';
 
 interface AppState {
   mt5Connected: boolean;
-  demoMode: boolean;
   currentAccount: string;
   notifications: { id: number; msg: string }[];
 }
@@ -27,7 +26,7 @@ interface AppContextType {
 }
 
 export const AppContext = createContext<AppContextType>({
-  state: { mt5Connected: true, demoMode: true, currentAccount: '5012847', notifications: [] },
+  state: { mt5Connected: false, currentAccount: '', notifications: [] },
   setState: () => {},
   addNotification: () => {},
 });
@@ -36,9 +35,8 @@ export const useApp = () => useContext(AppContext);
 
 export default function App() {
   const [state, setState] = useState<AppState>({
-    mt5Connected: true,
-    demoMode: true,
-    currentAccount: '5012847',
+    mt5Connected: false,
+    currentAccount: '',
     notifications: [],
   });
 
