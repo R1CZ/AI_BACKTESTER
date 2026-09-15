@@ -80,38 +80,99 @@ npm run dev
 npm run build
 ```
 
-### MT5 Worker Setup
+## 🔌 MT5 Connection (Required for Live Trading)
 
-The MT5 Worker is a Python service that bridges this web application with your MetaTrader 5 terminal.
+**📖 Complete Setup Guide:** See [MT5_SETUP_GUIDE.md](MT5_SETUP_GUIDE.md) for detailed instructions.
 
-1. Install the MT5 Worker on a Windows machine with MT5 installed:
+### Quick Setup (Windows)
+
+1. **Navigate to MT5 Worker:**
+   ```bash
+   cd mt5-worker
+   ```
+
+2. **Run the startup script:**
+   ```bash
+   start.bat
+   ```
+   This will:
+   - Create a virtual environment (if needed)
+   - Install dependencies
+   - Prompt you to configure `.env`
+   - Start the MT5 Worker service
+
+3. **Configure your API token:**
+   ```bash
+   # Generate a secure token
+   python -c "import secrets; print(secrets.token_urlsafe(32))"
+   
+   # Edit .env and paste the token
+   notepad .env
+   ```
+
+4. **Enable Algo Trading in MT5:**
+   - Open MetaTrader 5
+   - Tools → Options → Expert Advisors
+   - Check "Allow Algo Trading" and "Allow DLL imports"
+
+5. **Connect from Web App:**
+   - Navigate to **MT5 Connection**
+   - Enter: Host: `localhost`, Port: `8765`, Token: (from .env)
+   - Click **Connect**
+
+### Manual Setup
 
 ```bash
 cd mt5-worker
+
+# Create virtual environment
+python -m venv venv
+venv\Scripts\activate  # Windows
+# source venv/bin/activate  # Linux/Mac
+
+# Install dependencies
 pip install -r requirements.txt
-```
 
-2. Configure the worker:
-
-```bash
+# Configure
 cp .env.example .env
-# Edit .env with your settings
-```
+# Edit .env with your API token
 
-3. Start the worker:
-
-```bash
+# Start worker
 python worker.py
 ```
 
-4. In the web app, navigate to **MT5 Connection** and enter:
-   - Host: `localhost` (or IP of Windows machine)
-   - Port: `8765`
-   - API Token: Your configured token
+### Verify Connection
+
+```bash
+# Test the API
+curl http://localhost:8765/
+
+# Should return:
+# {"status":"running","service":"MT5 Worker","version":"1.0.0",...}
+```
+
+### Troubleshooting
+
+**Common Issues:**
+- ❌ "Failed to connect to MT5" → Make sure MT5 is running and "Allow Algo Trading" is enabled
+- ❌ "Invalid API token" → Verify token matches between `.env` and web app
+- ❌ "Symbol not found" → Make symbol visible in MT5 Market Watch
+- ❌ Can't connect from web app → Check firewall settings, use correct IP/hostname
+
+**Need help?** See [MT5_SETUP_GUIDE.md](MT5_SETUP_GUIDE.md) for detailed troubleshooting.
 
 ## 📖 Usage
 
-### 1. Upload Your Trading Bot
+### 1. Connect to MT5 (First Time Only)
+
+Before running backtests, you must connect to your MT5 terminal:
+
+1. Start the MT5 Worker (see [MT5 Connection](#-mt5-connection-required-for-live-trading) section)
+2. In the web app, go to **MT5 Connection**
+3. Enter your connection details and click **Connect**
+4. Verify you see your account balance and available symbols
+
+### 2. Upload Your Trading Bot
 
 Navigate to **New Backtest** and drag & drop your Python trading bot file (`.py`).
 
@@ -122,7 +183,9 @@ The AI will automatically:
 - Detect potential bugs and issues
 - Flag AI/ML dependencies
 
-### 2. Configure Backtest
+**Sample bots available:** Check `examples/` directory for tested strategies.
+
+### 3. Configure Backtest
 
 Set your backtest parameters:
 - Symbol and timeframe
@@ -132,7 +195,7 @@ Set your backtest parameters:
 - Execution mode
 - Risk per trade
 
-### 3. Run Backtest
+### 4. Run Backtest
 
 Click **START AI BACKTEST** to begin. The system will:
 - Load historical data from MT5
@@ -141,7 +204,7 @@ Click **START AI BACKTEST** to begin. The system will:
 - Generate performance metrics
 - Run AI analysis
 
-### 4. Review Results
+### 5. Review Results
 
 Explore comprehensive results:
 - **Overview** — Key metrics and equity curve
@@ -151,12 +214,32 @@ Explore comprehensive results:
 - **Regimes** — Market condition analysis
 - **Source Code** — Annotated code viewer
 
-### 5. Optimize
+### 6. Optimize
 
 - Run parameter sensitivity analysis
 - Perform walk-forward validation
 - Execute Monte Carlo simulations
 - Review AI recommendations
+
+## 🎯 Running Live
+
+### Backtesting Mode (Safe)
+- Uses historical data from MT5
+- No real trades are executed
+- Perfect for strategy validation
+- Can run multiple backtests simultaneously
+
+### Live Trading Mode (Advanced)
+⚠️ **WARNING:** Live trading involves real money and risk!
+
+To enable live trading:
+1. Ensure MT5 Worker is running
+2. Your trading bot must be designed for live execution
+3. Start with a demo account first
+4. Monitor positions closely
+5. Set appropriate risk limits
+
+**Important:** The web app is primarily designed for backtesting. For live trading, run your Python bot directly with MT5.
 
 ## 🏗️ Architecture
 
