@@ -51,8 +51,8 @@ function EquityChart() {
       lineStyle: 2,
     });
 
-    balanceSeries.setData(demoEquityCurve.map(d => ({ time: d.time as any, value: d.balance })));
-    equitySeries.setData(demoEquityCurve.map(d => ({ time: d.time as any, value: d.equity })));
+    balanceSeries.setData(demoEquityCurve.map(d => ({ time: d.time, value: d.balance })));
+    equitySeries.setData(demoEquityCurve.map(d => ({ time: d.time, value: d.equity })));
 
     chart.timeScale().fitContent();
 

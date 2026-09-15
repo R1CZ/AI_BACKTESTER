@@ -20,7 +20,7 @@ function TradingChart() {
       upColor: '#00E676', downColor: '#FF4D6D', borderUpColor: '#00E676', borderDownColor: '#FF4D6D', wickUpColor: '#00E676', wickDownColor: '#FF4D6D',
     });
     const data = generateCandleData();
-    candleSeries.setData(data as any);
+    candleSeries.setData(data);
     chart.timeScale().fitContent();
     const handleResize = () => { if (chartRef.current) chart.applyOptions({ width: chartRef.current.clientWidth }); };
     window.addEventListener('resize', handleResize);
@@ -43,7 +43,7 @@ function EquityChart() {
     const series = chart.addSeries(AreaSeries, {
       lineColor: '#00D4FF', topColor: 'rgba(0, 212, 255, 0.12)', bottomColor: 'rgba(0, 212, 255, 0.0)', lineWidth: 2,
     });
-    series.setData(demoEquityCurve.map(d => ({ time: d.time as any, value: d.equity })));
+    series.setData(demoEquityCurve.map(d => ({ time: d.time, value: d.equity })));
     chart.timeScale().fitContent();
     const handleResize = () => { if (chartRef.current) chart.applyOptions({ width: chartRef.current.clientWidth }); };
     window.addEventListener('resize', handleResize);

@@ -1,5 +1,6 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, createContext, useContext } from 'react';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import NewBacktest from './pages/NewBacktest';
@@ -50,25 +51,27 @@ export default function App() {
   };
 
   return (
-    <AppContext.Provider value={{ state, setState, addNotification }}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="backtests/new" element={<NewBacktest />} />
-            <Route path="backtests/:id" element={<BacktestResult />} />
-            <Route path="backtests" element={<Backtests />} />
-            <Route path="strategies" element={<Strategies />} />
-            <Route path="analytics" element={<Analytics />} />
-            <Route path="optimization" element={<Optimization />} />
-            <Route path="monte-carlo" element={<MonteCarlo />} />
-            <Route path="mt5" element={<MT5Connection />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </AppContext.Provider>
+    <ErrorBoundary>
+      <AppContext.Provider value={{ state, setState, addNotification }}>
+        <HashRouter>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="backtests/new" element={<NewBacktest />} />
+              <Route path="backtests/:id" element={<BacktestResult />} />
+              <Route path="backtests" element={<Backtests />} />
+              <Route path="strategies" element={<Strategies />} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="optimization" element={<Optimization />} />
+              <Route path="monte-carlo" element={<MonteCarlo />} />
+              <Route path="mt5" element={<MT5Connection />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Route>
+          </Routes>
+        </HashRouter>
+      </AppContext.Provider>
+    </ErrorBoundary>
   );
 }

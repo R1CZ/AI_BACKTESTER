@@ -123,7 +123,7 @@ export const demoStrategy: StrategyAnalysis = {
   ],
 };
 
-export const demoEquityCurve: { time: number; date: string; balance: number; equity: number }[] = Array.from({ length: 200 }, (_, i) => {
+export const demoEquityCurve: { time: string; date: string; balance: number; equity: number }[] = Array.from({ length: 200 }, (_, i) => {
   const progress = i / 200;
   const base = 1000 + progress * 842;
   const noise = Math.sin(i * 0.3) * 30 + (Math.sin(i * 1.7) * 15);
@@ -132,9 +132,8 @@ export const demoEquityCurve: { time: number; date: string; balance: number; equ
   const month = Math.floor(i / 16.67) + 1;
   const day = Math.floor((i % 16.67) * 1.8) + 1;
   const dateStr = `2026-${String(Math.min(month, 12)).padStart(2, '0')}-${String(Math.min(day, 28)).padStart(2, '0')}`;
-  const timestamp = Math.floor(new Date(dateStr).getTime() / 1000);
   return {
-    time: timestamp,
+    time: dateStr,
     date: dateStr,
     balance: Math.max(balance, 900),
     equity: Math.max(equity, 880),
@@ -166,8 +165,6 @@ export const generateCandleData = () => {
   for (let i = 0; i < 500; i++) {
     const date = new Date(startDate);
     date.setDate(date.getDate() + Math.floor(i / 60));
-    date.setHours(Math.floor((i % 60) / 2.5));
-    date.setMinutes((i % 60) * 24 % 60);
     
     const open = price;
     const change = (seededRandom() - 0.48) * 8;
@@ -175,8 +172,12 @@ export const generateCandleData = () => {
     const high = Math.max(open, close) + seededRandom() * 5;
     const low = Math.min(open, close) - seededRandom() * 5;
     
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
     data.push({
-      time: Math.floor(date.getTime() / 1000),
+      time: `${year}-${month}-${day}`,
       open: Math.round(open * 100) / 100,
       high: Math.round(high * 100) / 100,
       low: Math.round(low * 100) / 100,

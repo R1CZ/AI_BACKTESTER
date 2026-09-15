@@ -21,7 +21,7 @@ function DrawdownChart() {
     const ddData = demoEquityCurve.map(d => {
       peak = Math.max(peak, d.equity);
       const dd = ((d.equity - peak) / peak) * 100;
-      return { time: d.time as any, value: Math.round(dd * 100) / 100 };
+      return { time: d.time, value: Math.round(dd * 100) / 100 };
     });
     series.setData(ddData);
     chart.timeScale().fitContent();
@@ -48,9 +48,8 @@ function MonthlyChart() {
     });
     series.setData(demoMonthlyReturns.map((d, i) => {
       const month = String(i + 1).padStart(2, '0');
-      const timestamp = Math.floor(new Date(`2026-${month}-15`).getTime() / 1000);
       return {
-        time: timestamp as any,
+        time: `2026-${month}-15`,
         value: d.profit,
         color: d.profit >= 0 ? '#00E676' : '#FF4D6D',
       };

@@ -16,7 +16,10 @@ function MonteCarloChart() {
         equity = Math.max(equity + change, 500);
         const baseDate = new Date('2026-01-01');
         baseDate.setDate(baseDate.getDate() + i * 3);
-        return { time: Math.floor(baseDate.getTime() / 1000) as any, value: Math.round(equity * 100) / 100 };
+        const year = baseDate.getFullYear();
+        const month = String(baseDate.getMonth() + 1).padStart(2, '0');
+        const day = String(baseDate.getDate()).padStart(2, '0');
+        return { time: `${year}-${month}-${day}`, value: Math.round(equity * 100) / 100 };
       });
     });
   }, []);
