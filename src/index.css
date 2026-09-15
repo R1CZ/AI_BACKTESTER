@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #070B12;
+  --bg-panel: #0D131D;
+  --bg-elevated: #131B27;
+  --border: #1C2633;
+  --border-light: #2A3A4D;
+  --primary: #00D4FF;
+  --positive: #00E676;
+  --negative: #FF4D6D;
+  --warning: #FFB020;
+  --text: #E8F0F8;
+  --text-muted: #7A8BA0;
+  --text-dim: #4A5568;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-light);
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes progress-bar {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.glow-primary {
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+}
+
+.glow-positive {
+  box-shadow: 0 0 15px rgba(0, 230, 118, 0.1);
+}
+
+.glow-negative {
+  box-shadow: 0 0 15px rgba(255, 77, 109, 0.1);
+}
+
+.gradient-border {
+  position: relative;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--primary), transparent, var(--positive));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.trade-marker-buy {
+  color: var(--positive);
+}
+
+.trade-marker-sell {
+  color: var(--negative);
+}
