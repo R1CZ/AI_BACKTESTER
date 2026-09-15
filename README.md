@@ -363,9 +363,9 @@ This software is for educational and research purposes. Trading involves substan
 
 ## 📞 Support
 
-- 📧 Email: support@aibacktester.dev
+- 📧 Email: manisanjonric02@gmail.com
 - 🐛 Issues: [GitHub Issues](https://github.com/yourusername/ai-backtester/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/yourusername/ai-backtester/discussions)
+- 💬 Discussions: [GitHub Discussions](https://github.com/R1CZ)
 
 ---
 
